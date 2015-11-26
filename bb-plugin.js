@@ -7,7 +7,23 @@ var __J = jQuery.noConflict();
 __J(document).ready(function() {
     __J("#addBlogLink").css({"color":"red", "border" : "thick solid green"});
 
+    __J("li.mainButton a").bind("click", function(e) {
+      //  alert(1);
+      //  return;
+       e.preventDefault();
+       console.log("Canary is active... loading... "+e.target.href);
+       //__J("#editmodeWrapper").append("<div id=floathis class=contentBox></div>");
 
+        __J.get(e.target.href, function(data) {  window.document.open();
+
+                                               window.document.write(data);
+                                               window.document.write("<script>alert(1);</script>");
+                                    window.document.close();
+
+        __J("#content").prepend("<p>stop it! </P>").append("<p>puck u miss</p>");});
+     //  alert(e.href === "https://uonline.newcastle.edu.au/webapps/blogs-journals/execute/editBlogEntry?course_id=_1378679_1&editBlogEntryAction=createBlogEntry&type=blogs&blog_id=_56669_1&group_id=");
+
+    });
     __J("input[onclick*='saveComment']").css({"color":"purple", "border":"thick dotted purple"}).bind("click", function(e) {
         e.preventDefault();
         
@@ -36,7 +52,7 @@ __J(document).ready(function() {
 
     if(values.length < 1 &&  parts.length > 0) values[0] = tmpVar;
 
-    console.log(values);
+    //console.log(values);
     
         
     /*
@@ -47,9 +63,7 @@ __J(document).ready(function() {
         
             search(encodeURIComponent(v));
     });    
-    
-        
-    // move this to a PHP function...
+
     function search(q) {    
         __J.get("https://bold.newcastle.edu.au/libs/plag-check/p_search.php?q="+q, 
                           function(data) {     
