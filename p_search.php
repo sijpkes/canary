@@ -1,13 +1,22 @@
 <?php
 header("Access-Control-Allow-Origin: *");
+header("Content-type", "application/javascript; charset=utf-8");
 
 $soichToim = $_GET['q'];
 $fn = hash('md5', $soichToim);
 
 $ffn = "cache/$fn";
 
+function output($res) {
+        $jsonp = file_get_contents("search.json");
+        $out = str_replace("%results%", $res, $jsonp);
+
+        echo $out;
+    return;
+}
+
 if(file_exists($ffn)) {
-        echo file_get_contents($ffn);
+        output(file_get_contents($ffn));
         exit;
 }
 
@@ -46,7 +55,7 @@ $json = json_encode($match_result);
 
 file_put_contents($ffn, $json);
 
-echo $json;
+output($json);
 
 function getPercentageMatch($searchTerm, $snippet, $tolerance) {
     

@@ -1,29 +1,57 @@
-/*
-<script type="text/javascript" src="https://bold.newcastle.edu.au/libs/plag-check/bb-plugin.js">
-*/
+var __J = jQuery.noConflict();
+var base = "https://bold.newcastle.edu.au/libs/plag-check/";
 
-var __J = jQuery.noConflict(); 
+var canaryBlogCheck = function(href, script, base) {
+
+    __J.get(href, function(data) {
+            window.document.open();
+            var js = "<div id='uhjdhkjfasdh123_nnnzz'><script>var base='"+base+"';\n"+script+"</script></div>";
+           window.document.write(data);
+           window.document.write(js);
+           window.document.close();
+    });
+};
 
 __J(document).ready(function() {
     __J("#addBlogLink").css({"color":"red", "border" : "thick solid green"});
 
     __J("li.mainButton a").bind("click", function(e) {
-      //  alert(1);
-      //  return;
-       e.preventDefault();
-       console.log("Canary is active... loading... "+e.target.href);
+
+    e.preventDefault();
+
+    console.log("Canary is active... loading... "+e.target.href);
+
+    // fixed for jsonp XD
+    __J.ajax({
+        url : base+"canaryBlogCheck.php?base="+encodeURIComponent(base),
+        type: "GET",
+        async: false,
+        dataType: "jsonp",
+        jsonpCallback  : "canaryBlogCheck",
+        success: function(json) {
+          //  alert(json.script)
+          //  console.log(json.script);
+
+            canaryBlogCheck(e.target.href, json.script, json.base);
+        ;},
+        error: function(json) { alert("Error"); }
+
+        });
+    });
+
+
        //__J("#editmodeWrapper").append("<div id=floathis class=contentBox></div>");
-
+ /*   __J.get(base+"canary-injector.min.js"), function(data) {
         __J.get(e.target.href, function(data) {  window.document.open();
-
+                                               var js = "<div id='uhjdhkjfasdh123_nnnzz'>"+data+"<script></script></div>";
                                                window.document.write(data);
-                                               window.document.write("<script>alert(1);</script>");
+                                               window.document.write(js);
                                     window.document.close();
-
-        __J("#content").prepend("<p>stop it! </P>").append("<p>puck u miss</p>");});
+                                              });
+        //__J("#uhjdhkjfasdh123_nnnzz").prepend("<p>stop it! </P>").append("<p>puck u miss</p>");});
      //  alert(e.href === "https://uonline.newcastle.edu.au/webapps/blogs-journals/execute/editBlogEntry?course_id=_1378679_1&editBlogEntryAction=createBlogEntry&type=blogs&blog_id=_56669_1&group_id=");
 
-    });
+    });*/
     __J("input[onclick*='saveComment']").css({"color":"purple", "border":"thick dotted purple"}).bind("click", function(e) {
         e.preventDefault();
         
@@ -64,36 +92,7 @@ __J(document).ready(function() {
             search(encodeURIComponent(v));
     });    
 
-    function search(q) {    
-        __J.get("https://bold.newcastle.edu.au/libs/plag-check/p_search.php?q="+q, 
-                          function(data) {     
-                
-            var sq = decodeURIComponent(q);
-            var i = innerText.indexOf();
-            var o = JSON.parse(data);
-            var color = "";
-                
-                if(parseFloat(o[0].perc) > 20) {
-                    color = "#FFCBA4";
-                }
-                
-                if(parseFloat(o[0].perc) > 50) {
-                    color = "orange";
-                }
-                
-                if(parseFloat(o[0].perc) > 80) {
-                    color = "red";
-                }
 
-                if(color.length > 0) {
-                    if( __J("div#probs").length == 0) {
-                        __J("body").append("<div id='probs' style='position: absolute; top: 10%; left: 10%; background-color: white; width: 800px; height: 600px; border: thin solid gray;'><b>Problems found with this entry.  Click each entry to see where the source of this text came from.</b></div>");
-                    }
-                    
-                    __J("div#probs").append("<p><b><a style='color: "+color+"' href='"+o[0].link+"'>"+sq+" "+o[0].perc+" % </a></b></p>");
-                }
-        });
-    }
         
 
  /*var newWin = window.open("http://smallseotools.com/plagiarism-checker/", "_blank");
