@@ -3,11 +3,14 @@ header("Access-Control-Allow-Origin: *");
 header("Content-type", "application/javascript; charset=utf-8");
 
 $soichToim = $_GET['q'];
+$pdl = $_GET['pdl'];
 $fn = hash('md5', $soichToim);
 
 $ffn = "cache/$fn";
 
-function output($res) {
+//$parse_js = file_get_contents("parse.min.js");
+
+function output($parse_js, $res) {
         $jsonp = file_get_contents("search.json");
         $out = str_replace("%results%", $res, $jsonp);
 
@@ -16,7 +19,7 @@ function output($res) {
 }
 
 if(file_exists($ffn)) {
-        output(file_get_contents($ffn));
+        output($parse_js, file_get_contents($ffn));
         exit;
 }
 
@@ -55,7 +58,7 @@ $json = json_encode($match_result);
 
 file_put_contents($ffn, $json);
 
-output($json);
+output($parse_js, $json);
 
 function getPercentageMatch($searchTerm, $snippet, $tolerance) {
     
@@ -123,14 +126,18 @@ function getPercentageMatch($searchTerm, $snippet, $tolerance) {
         $percent = 0;
         $match = similar_text($t["text"], $searchTerm, $percent);
         
-        $n_matched[] = array("match" => $match, "phrase" => $t["text"], "perc" => $percent, "displayLink" => "#", "link" => "#");   
+        $n_matched[] = array("match" => $match, "phrase" => $searchTerm, "perc" => $percent, "displayLink" => "#", "link" => "#");
     }
     
     return $n_matched;
 }
 
 function _filter($a, $b) {
-    return $a['perc'] < $b['perc'];
+    if(empty($pdl)) {
+        return $a['perc'] < $b['perc'];
+    } else {
+        return $a['link'] == $pdl; //||  $a['perc'] < $b['perc'];
+    }
 }
 
 function checkRange($min, $max, $value) {
