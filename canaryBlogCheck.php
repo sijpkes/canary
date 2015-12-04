@@ -1,5 +1,5 @@
 <?php
-    $script = array("script" => file_get_contents("canarybc.min.js"),
+    $script = array("script" => file_get_contents("canarybc.js"),
                    "base" => $_GET['base']);
 ?>
 

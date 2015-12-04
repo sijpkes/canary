@@ -136,7 +136,7 @@ function _filter($a, $b) {
     if(empty($pdl)) {
         return $a['perc'] < $b['perc'];
     } else {
-        return $a['link'] == $pdl; //||  $a['perc'] < $b['perc'];
+        return strcmp($a['link'], $pdl) === 0; //||  $a['perc'] < $b['perc'];
     }
 }
 
