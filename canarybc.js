@@ -1,24 +1,20 @@
+
 var canary = !canary ? {} : canary;
 
+var launching = true;
 var lastStr = "";
-var lastSearchedStr = "";
 var domc = null;
+var sensitivity = 75;
 
 var searchIndex = 0;
 
 canary.markMap = [];
 
-function getElementIndex(cursor, tinymceTextElements) {
-    var total = 0;
+__J(".taskbuttondiv_wrapper").bind("click", "input[onclick*='checkDupeFile']",  function(e) {
+        e.preventDefault();
 
-    __J(tinymceTextElements).each(function (i) {
-        current = __J(this).text().length();
-        total += current;
-        if (cursor < total) {
-            return i;
-        }
-    });
-}
+
+});
 
 function run(str, tinymceTextElements) {
     clearTimeout(domc);
@@ -45,13 +41,10 @@ function run(str, tinymceTextElements) {
             if (tmpVar.length < 55) {
                 tmpVar += " " + this;
             } else {
-                // var elementIndex = getElementIndex(cursor, tinymceTextElements);
                 values[i] = tmpVar.replace(/\s+/g, " ");
                 i++;
                 tmpVar = this;
             }
-
-            //cursor++;
         });
 
         if (values.length < 1 && parts.length > 0) values[0] = {
@@ -59,9 +52,8 @@ function run(str, tinymceTextElements) {
             value: tmpVar
         };
 
-    }
-
     search(values, tinymceTextElements);
+    }
 
     domc = setTimeout("checkDOMChanged(true)", 1000);
 }
@@ -83,6 +75,12 @@ function checkDOMChanged(reset) {
     canary.ifr = __J("#blogEntry_desc_text_ifr").contents();
     canary.tmceContent = __J(canary.ifr).find("#tinymce").contents();
 
+    if(launching) {
+
+    } else {
+
+    }
+
     var str = __J(canary.tmceContent).text();
     str = removeQuotedText(str);
     canary.rawContent = __J(canary.tmceContent).text();
@@ -103,7 +101,10 @@ function checkDOMChanged(reset) {
     }
 
     domc = setTimeout("checkDOMChanged(false)", 1000);
+    launching = false;
 }
+
+
 
 function removeQuotedText(str) {
     var stra;
@@ -137,7 +138,7 @@ function parseResult(q, results, tinymceTextElements) {
     var o = typeof results === "string" ? JSON.parse(results) : results;
     var color = "";
     var res = results[0];
-    canary.prevLink = res.link;
+    canary.prevLink = ! res.link ? "" : res.link;
 
     if (typeof res === 'undefined') {
         console.log("No results");
@@ -176,7 +177,7 @@ function parseResult(q, results, tinymceTextElements) {
                     orig_nphrase = "";
 
                     //console.log("ind: " + ind + " " + tphrase + "\n\n<<< FOR >>>\n" + tnodestr);
-                    if (ind != -1) {
+                    if (ind != -1 && res.perc > sensitivity) {
                         var id = "_can" + i;
 
                         if(__J(v).find("a#_cananch"+id).length == 0) {
@@ -237,3 +238,6 @@ function search(values, tinymceTextElements) {
 
     });
 }
+
+// @TODO: parse out blog user details from here to pass to server...
+console.log(__J("#breadcrumbs").contents().find("a[href*='viewBlog']").attr("href"));
