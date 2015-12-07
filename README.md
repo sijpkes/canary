@@ -68,4 +68,4 @@ check ({
 
 Compatibility
 ============
-Blackboard Learn
+Blackboard Learn built in blogs
