@@ -15,4 +15,7 @@ bower_components/
 
 build/
 dist/
+
+#only include this convenient php script
+!canaryBlogCheck.php
 >>>>>>> 16a6aba6ff460261d485c1d21a68ac4aae759ad4
