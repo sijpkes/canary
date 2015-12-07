@@ -12,7 +12,10 @@ bower_components/
 *.min.js
 *.min.js.map
 .brackets.json
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
 build/
 dist/
 >>>>>>> 16a6aba6ff460261d485c1d21a68ac4aae759ad4
