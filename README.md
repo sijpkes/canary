@@ -8,7 +8,7 @@ Implemented Features:
 ---------------------
 * Unobtrusive asynchronous highlighting of text in the #tinymce iframe within Blackboard Learn
 * Title attribute added to element in the format (n% match to [match url])
-* Text can be ignoreb by canary by the student placing text within any of these style of quotes: " or “ ” 
+* Text can be ignoreb by canary by placing text within any of these style of quotes: " or “ ” 
 
 Todo Features:
 --------------
@@ -20,8 +20,22 @@ Todo Features:
 
 Requirements
 ------------
-Google search service using the Google API that returns JSONP in the following example format. 
-(Example search is: "this is a test" on 7 Dec 2015 at 11:50 am)
+* Google Custom Search API 
+* A Google Custom Search Engine
+
+You will need to implement a Google search service using the Google API that takes up to two GET parameters:
+
+`q` and `pdl` (optional)
+
+The `q` is similar to a standard Google query URL:
+q=this%20is%20a%20test
+
+The optional `pdl` is for queries following the initial search, in order for your service to favour results from the first result URL.
+e.g. `pdl=http://my.previous.search.result.com`
+
+The service must return JSONP in the following example format. 
+
+[Example search is: "this is a test" on 7 Dec 2015 at 11:50 am Sydney/Australia]
 
 ```
 check ({  
