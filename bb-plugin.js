@@ -1,16 +1,16 @@
 var __J = jQuery.noConflict();
 var base = "https://bold.newcastle.edu.au/libs/plag-check/";
 
-var canaryBlogCheck = function(href, script, base) {
+/*var canaryBlogCheck = function(href, script, base) {
 
     __J.get(href, function(data) {
             window.document.open();
-            var js = "<div id='uhjdhkjfasdh123_nnnzz'><script>var base='"+base+"';\n"+script+"</script></div>";
+            var js = "<script>var base='"+base+"';\n"+script+"</script>";
            window.document.write(data);
            window.document.write(js);
            window.document.close();
     });
-};
+};*/
 
 __J(document).ready(function() {
     __J("#addBlogLink").css({"color":"red", "border" : "thick solid green"});
