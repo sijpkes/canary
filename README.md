@@ -20,6 +20,12 @@ Todo Features:
 
 Requirements
 ------------
+
+Custom Search Engine
+--------------------
+
+The custom search engine returns 55 character string matches to web sites.  Only the top 3 matches, orderered by percentage matched in descending order are returned. The `sensitivity` variable in the `canarybc.js` file determines the threshold for highlighting items in the text either in pale blue for a 30% - 65% match, orange for a 66% to 85% match and red for an 86% to 100% match.
+
 A dedicated search service will be available soon, OR you can implement your own using the following instructions:
 
 * Google Custom Search API 
