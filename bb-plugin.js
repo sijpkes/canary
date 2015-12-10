@@ -1,12 +1,17 @@
 var __J = jQuery.noConflict();
 var base = "https://bold.newcastle.edu.au/libs/plag-check/";
 
-var canaryBlogCheck = function(href, script, base) {
+var canaryBlogCheck = function(href, script, base, SID, name, token) {
 
     // get the clicked button href and forward to that page with a script attached.
     __J.get(href, function(data) {
             window.document.open();
-            var js = "<script>var base='"+base+"';\n"+script+"</script>";
+            var js = "<script>var base='"+base+"';\n\
+                               var SID = '"+SID+"';\n\
+                               var csrfname='"+name+"';\n\
+                               var csrftoken='"+token+"';\n"
+                                +script+"</script>";
+
            window.document.write(data);
            window.document.write(js);
            window.document.close();
@@ -30,7 +35,7 @@ __J(document).ready(function() {
         dataType: "jsonp",
         jsonpCallback  : "canaryBlogCheck",
         success: function(canarybc) {
-            canaryBlogCheck(e.target.href, canarybc.script, base);
+            canaryBlogCheck(e.target.href, canarybc.script, base, canarybc.SID, canarybc.name, canarybc.token);
         ;},
         error: function(json) { alert("Error"); }
 
