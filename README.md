@@ -20,18 +20,27 @@ Todo Features:
 
 Requirements
 ------------
+A dedicated search service will be available soon, OR you can implement your own using the following instructions:
+
 * Google Custom Search API 
 * A Google Custom Search Engine
 
-You will need to implement a Google search service using the Google API that takes up to two GET parameters:
+Implement a Google search service using the Google API that takes up to two GET parameters:
 
-`q` and `pdl` (optional)
+`q` : URI encoded search query
+`u` : generated user id from Blackboard Learn
+`name` : CSRF name
+`token` : CSRF token
+`pdl` : previously matched link (optional)
+`sid` : PHP session id (this is optional depending on what language you are using to implement your server).
 
 The `q` is similar to a standard Google query URL:
 q=this%20is%20a%20test
 
 The optional `pdl` is for queries following the initial search, in order for your service to favour results from the first result URL.
 e.g. `pdl=http://my.previous.search.result.com`
+
+CSRF tokens follow standard CSRF conventions (see OWASP website)
 
 The service must return JSONP in the following example format. 
 
@@ -68,4 +77,4 @@ check ({
 
 Compatibility
 ============
-Blackboard Learn built in blogs
+Blackboard Learn blog tool
