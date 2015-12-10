@@ -27,12 +27,12 @@ A dedicated search service will be available soon, OR you can implement your own
 
 Implement a Google search service using the Google API that takes up to two GET parameters:
 
-`q` : URI encoded search query
-`u` : generated user id from Blackboard Learn
-`name` : CSRF name
-`token` : CSRF token
-`pdl` : previously matched link (optional)
-`sid` : PHP session id (this is optional depending on what language you are using to implement your server).
+* `q` : URI encoded search query
+* `u` : generated user id from Blackboard Learn
+* `name` : CSRF name
+* `token` : CSRF token
+* `pdl` : previously matched link (optional)
+* `sid` : PHP session id (this is optional depending on what language you are using to implement your server).
 
 The `q` is similar to a standard Google query URL:
 q=this%20is%20a%20test
