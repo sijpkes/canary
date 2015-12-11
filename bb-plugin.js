@@ -21,7 +21,7 @@ var canaryBlogCheck = function(href, script, base, SID, name, token) {
 __J(document).ready(function() {
     __J("#addBlogLink").css({"color":"red", "border" : "thick solid green"});
 
-    __J("li.mainButton a").bind("click", function(e) {
+    __J("li.mainButton a, div.cmdiv a[title='Edit']").bind("click", function(e) {
 
     e.preventDefault();
 

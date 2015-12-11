@@ -21,8 +21,40 @@ var searchIndex = 0;
 canary.markMap = [];
 canary.total = 0;
 canary.count = 0;
+canary.mean = 0;
+canary.ids = [];
 
-__J(".taskbuttondiv_wrapper").bind("click", "input.submit",  function(e) {
+/*
+    This function from:
+
+    http://stackoverflow.com/questions/3787924/select-deepest-child-in-jquery/21884036#21884036
+
+    By:
+      http://stackoverflow.com/users/692646/russellfeeed
+*/
+(function($) {
+
+    $.fn.deepestChild = function() {
+        if ($(this).children().length==0)
+            return $(this);
+
+        var $target = $(this).children(),
+        $next = $target;
+
+        while( $next.length ) {
+          $target = $next;
+          $next = $next.children();
+        }
+
+        return $target;
+    };
+
+}(jQuery));
+
+
+__J(".taskbuttondiv_wrapper").on("click", "input.submit",  function(e, options) {
+        options = options || {};
+       if(!options.pc) {
         e.preventDefault();
 
         var s = "&s=1";
@@ -32,15 +64,16 @@ __J(".taskbuttondiv_wrapper").bind("click", "input.submit",  function(e) {
 
         // tell server to store this as a new entry to include in later searches.
         __J.ajax({
-        url: base + "p_search.php?"+sid+"q=" + encodeURIComponent(values[searchIndex]) + u + csrf + s,
+        url: base + "p_search.php?"+sid+ u + csrf + s,
         type: "GET",
         async: false,
         dataType: "jsonp",
-        jsonpCallback: "check",
+        jsonpCallback: "response",
         success: function (json) {
             console.log(json);
-            if(json.saved) {
-                alert("saved!");
+            if(json.msg.length > 0) {
+                alert(json.msg);
+                __J(e.currentTarget).trigger("click", { 'pc' : true });
             }
         },
         error: function (json) {
@@ -48,13 +81,14 @@ __J(".taskbuttondiv_wrapper").bind("click", "input.submit",  function(e) {
         }
 
     });
+    }
 });
 
-function run(str, tinymceTextElements) {
+function run(str, tinymceTextElements, callback) {
     clearTimeout(domc);
-
     console.log("Running scan...");
-     __J(".taskbuttondiv_wrapper input.submit").attr("disabled", "disabled").attr("disabled", "").css("opacity", "0.5");
+
+     __J(".taskbuttondiv_wrapper input.submit, .taskbuttondiv_wrapper input[name*='Save Entry as Draft']").prop("disabled", true).css("opacity", "0.5");
 
     if (__J("#plagcheck").length === 0) {
         __J("body").append("<div id=\"plagcheck\"></div>");
@@ -68,9 +102,9 @@ function run(str, tinymceTextElements) {
 
     //console.log("PARTS: " + parts);
     //console.log("Remainder: "+(str.length % 55));
-    var mod = Math.abs(lastStr.length - str.length);
-    console.log("Mod: "+mod);
-    if (mod > 35) {
+   // var mod = Math.abs(lastStr.length - str.length);
+ //   console.log("Mod: "+mod);
+  //  if (mod > 1) {
 
         __J(parts).each(function () {
             if (tmpVar.length < 55) {
@@ -87,11 +121,10 @@ function run(str, tinymceTextElements) {
             value: tmpVar
         };
 
-    search(values, tinymceTextElements);
-    }
+    search(values, tinymceTextElements, callback);
+  //  }
 
     domc = setTimeout("checkDOMChanged(true)", 1000);
-    //__J(".taskbuttondiv_wrapper input.submit").attr("disabled", "").css("opacity", "");
 }
 
 __J(".textboxtable").bind("mouseover", "body#tinymce", function () {
@@ -112,24 +145,38 @@ function checkDOMChanged(reset) {
     canary.tmceContent = __J(canary.ifr).find("#tinymce").contents();
 
     var str = __J(canary.tmceContent).text();
+    var ostr = str.toString();
+
+   // if(str.length === 0) return;
+
+ //   console.log(str.replace(/[.,-\/#!$%\^&\*;:{}=\-_`~() ]/g, ''));
+    if(str.replace(/[.,-\/#!$%\^&\*;:{}=\-_`~() ]/g, '').length == 0) {
+        __J(canary.tmceContent).html("");
+    }
+
     str = removeQuotedText(str);
     canary.rawContent = __J(canary.tmceContent).text();
+
 
     var tinymceTextElements = __J(canary.ifr).find("#tinymce").find("*");
 
     if (reset === true) {
-        lastStr = str;
+        lastStr = ostr;
         console.log("Resetting check...");
+        enableButtons();
     }
 
-    if (lastStr != str) {
-        console.log("unwrapping");
-         __J(canary.tmceContent).find(".canned").contents().unwrap();
+    if (lastStr.length != ostr.length || lastStr !== ostr) {
+        console.log("\n\n **** searching *** \n\n");
+
+        __J(canary.tmceContent).find(".canned").contents().unwrap();
 
         canary.total = 0;
         canary.count = 0;
-        run(str, tinymceTextElements);
-        lastStr = str;
+        canary.mean = 0;
+
+        run(str, tinymceTextElements, function() { });
+        lastStr = ostr;
     }
 
     domc = setTimeout("checkDOMChanged(false)", 1000);
@@ -171,39 +218,40 @@ function parseResult(q, results, tinymceTextElements) {
     canary.total += parseFloat(res.perc);
     canary.count = canary.count + 1;
 
-    var mean = Math.floor(canary.total / canary.count);
+    canary.mean = Math.floor(canary.total / canary.count);
 
     if (typeof res === 'undefined') {
         console.log("No results");
         return;
     }
     console.log(results);
-    //__J(results).each(function() {
-    //console.log(res);
-    if (mean > 30) {
-        color = "#FFCBA4";
-    }
 
-    if (mean > 65) {
-        color = "orange";
-    }
+     if (res.perc > 30) {
+                      color = "#FFCBA4";
+                  }
 
-    if (mean > 84) {
-        color = "red";
-    }
-    console.log(mean);
+                if (res.perc > 65) {
+                    color = "orange";
+                }
+
+                if (res.perc > 85) {
+                    color = "red";
+                }
 
     var dupes = [];
+    //var ids = [];
     var prevPerc = 0;
-    if (color != "") {
+
+    if (canary.mean > 85) {
         __J(tinymceTextElements).each(function (i, v) {
+            //console.log("Children: "+__J(v).children().length);
+            if(__J(v).text().length > 0 && v.tagName != "BR") {
+                console.log("checking tag: "+v.tagName);
             dupes.push(v);
             var id;
-            if (dupes.indexOf(__J(this).parent()) == -1) {
+           // if (dupes.indexOf(__J(this).parent()) == -1) {
 
                 var nodeStr = __J(v).text(); //.toString();
-
-                if (nodeStr.length > 0) {
 
                     var tnodestr = nodeStr.replace(/\s+/g, '');
                     var tphrase = res.phrase.replace(/\s+/g, '');
@@ -213,17 +261,51 @@ function parseResult(q, results, tinymceTextElements) {
 
                     //console.log("ind: " + ind + " " + tphrase + "\n\n<<< FOR >>>\n" + tnodestr);
                     if (ind != -1 && res.perc > sensitivity) {
+                        console.log(res.perc);
                         id = "_can" + i;
-                        var al = __J(v).find("a#_cananch"+id);
+                        canary.ids[id] = res.perc;
 
-                        if(al.length == 0) {
-                            var anchor = __J("<a/>");
-                        __J(anchor).attr("href","#").attr("id","_cananch"+id).addClass('canned');//.css("color", color);
+                        var al = __J(v).find("a._cananch"+id);
+                        var elm;
 
-                        __J(v).attr("id", id).contents().wrap(anchor);
+                        if(__J(v).hasClass("canary")) {
+                               elm = __J(v);
+                        } else {
+                            elm = __J(v).closest(".canary");
                         }
 
-                        var title = ! __J(v).attr("title") ? "Matched:     \nParts of this section have a: \n" : __J(v).attr("title");
+                        if(elm.length == 0) {
+                             __J(v).addClass("canary");
+                            __J(v).addClass(id);
+                        }
+
+                        //if(__J(v).closest(".canary").length == 0) {
+
+
+                        if(al.length == 0) {
+                            var anchor;
+
+                            if(v.tagName == "A") {
+                                anchor = __J(v);
+                                anchor.data("prevContent", anchor.html());
+                            } else {
+                                anchor = __J("<a/>");
+                            }
+                            __J(anchor).attr("href","#").addClass("_cananch"+id).addClass('canned').css("color", color);
+
+
+                                __J(v).contents().wrap(anchor);
+                        }
+
+
+                        var title = ! elm.attr("title") ? "Matched:     \nParts of this section have a: \n" : elm.attr("title");
+
+                        var oldTitle = "";
+                        if(title.indexOf("Matched: ") == -1) {
+                            oldTitle = title;
+                            title = "Matched:     \nParts of this section have a: \n";
+                        }
+
                         var ti = title.indexOf("Matched: ") + 9;
 
                         if(title.indexOf(res.displayLink) == -1) {
@@ -234,21 +316,46 @@ function parseResult(q, results, tinymceTextElements) {
                         var tp1 = title.substr(0, ti);
                         var tp2 = title.substr(ti+3, title.length);
 
-                        title = tp1 + mean + "%" + tp2;
+                        title = tp1 + canary.mean + "%" + tp2;
 
-                        __J(v).attr("title", title);
-                    }
+                        if(oldTitle.length > 0) {
+                            "\n---------\n Original text: "+oldTitle;
+                        }
+
+                        elm.attr("title", title);
                 }
+
+
+        //    __J(v).find("a._cananch"+id).css("color", color);
             }
-            __J(v).find("a#_cananch"+id).css("color", color);
         });
+           console.log("count: "+canary.count+" total: "+canary.total+" canary mean: "+canary.mean+" IDS");
+       // console.log(canary.ids);
+      /*  for(var i in canary.ids) {
+            console.log(canary.ids[i] + " < " + sensitivity);
 
-
+            if(canary.ids[i] < sensitivity) {
+                __J("#tinymce").find("#"+i+" a").remove();
+            }
+        }*/
     }
+
+    console.log("mean = "+canary.mean);
+
+    canary.ids = [];
+
+    enableButtons();
 }
 
+function enableButtons() {
+     if(canary.mean <= sensitivity) {
+        __J(".taskbuttondiv_wrapper input.submit").prop("disabled", false).css("opacity", "");
+    }
 
-function search(values, tinymceTextElements, firstIteration) {
+    __J(".taskbuttondiv_wrapper input[name*='Save Entry as Draft']").prop("disabled", false).css("opacity", "");
+}
+
+function search(values, tinymceTextElements, callback, firstIteration) {
 
     if(typeof firstIteration === 'undefined') {
         firstIteration = true;
@@ -278,9 +385,10 @@ function search(values, tinymceTextElements, firstIteration) {
                 searchIndex++;
 
                 if (searchIndex < values.length) {
-                    search(values, tinymceTextElements, false);
+                    search(values, tinymceTextElements, callback, false);
                 } else {
                     searchIndex = 0;
+                    callback();
                 }
             }
         },
