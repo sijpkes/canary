@@ -1,12 +1,16 @@
 var __J = jQuery.noConflict();
+
+var clientUrl =  "https://nandi.16mb.com/canary/";
 var base = "https://bold.newcastle.edu.au/libs/plag-check/";
 
+canary.loadErrorCount = 0;
 var canaryBlogCheck = function(href, script, base, SID, name, token) {
 
-    // get the clicked button href and forward to that page with a script attached.
-    __J.get(href, function(data) {
-            window.document.open();
+    var x = function(data) {
+        canary.loadErrorCount = 0;
+         window.document.open();
             var js = "<script>var base='"+base+"';\n\
+                                var clientUrl='"+clientUrl+"';\n\
                                var SID = '"+SID+"';\n\
                                var csrfname='"+name+"';\n\
                                var csrftoken='"+token+"';\n"
@@ -15,6 +19,23 @@ var canaryBlogCheck = function(href, script, base, SID, name, token) {
            window.document.write(data);
            window.document.write(js);
            window.document.close();
+    };
+
+    // get the clicked button href and forward to that page with a script attached.
+    __J.ajax(
+        { url: href,
+          type: "get",
+          success: x,
+          error: function(error) {
+              if(canary.loadErrorCount > 2) {
+                  alert("Gave up trying to reach "+href+"after "+canary.loadErrorCount+
+" attempts\n\nERROR is: \n-----\n"+error);
+                  return false;
+              }
+              console.error("ERROR loading page... retrying");
+              canaryBlogCheck(href, script, base, SID, name, token);
+              canary.loadErrorCount = canary.loadErrorCount + 1;
+          }
     });
 };
 
@@ -29,7 +50,7 @@ __J(document).ready(function() {
 
     // fixed for jsonp XD
     __J.ajax({
-        url : base+"canaryBlogCheck.php?base="+encodeURIComponent(base),
+        url : base+"canaryBlogCheck.php?base="+encodeURIComponent(base)+"&clientUrl="+encodeURIComponent(clientUrl),
         type: "GET",
         async: false,
         dataType: "jsonp",
